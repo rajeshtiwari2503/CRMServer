@@ -95,6 +95,7 @@ const bradRegistrationSchema = new mongoose.Schema({
  
         name:{type:String,required:true},
         contact:{type:String,required:true},
+        serviceName:{type:String },
         email:{type:String,required:true},
         password:{type:String },
         image:{type:String },
@@ -102,7 +103,7 @@ const bradRegistrationSchema = new mongoose.Schema({
         address:{type:String },
         certificate:{type:String },
         skill:{type:String },
-        status:{type:String,default:"AVAILABLE"},
+        liveStatus:{type:String,default:"AVAILABLE"},
         role: { type: String, default: "TECHNICIAN" },
         verification: { type: String, default: "NOT_VERIFY" }
         , otp: { type: Number },

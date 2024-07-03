@@ -36,11 +36,18 @@ const complaintSchema = new mongoose.Schema({
   serialNo: { type: String },
   purchaseDate: { type: Date },
   warrantyStatus: { type: String },
+  warrantyYears: { type: String },
   priorityLevel: { type: String },
   userName: { type: String },
   userId: { type: String },
   dealerName: { type: String },
   dealerId: { type: String },
+  updateHistory: [
+    {
+      updatedAt: { type: Date, default: Date.now },
+      changes: { type: Map, of: String },
+    },
+  ],
   assignServiceCenter: { type: String },
   assignServiceCenterId: { type: String },
   assignTechnician: { type: String },
