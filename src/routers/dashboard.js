@@ -417,7 +417,7 @@ router.get("/dashboardDetailsByTechnicianId/:id", async (req, res) => {
       complaintPartPendingCount
     ] = await Promise.all([
       Complaints.countDocuments(query),
-      Complaints.countDocuments({ ...query, status: 'NEW' }),
+      Complaints.countDocuments({ ...query, status: 'IN PROGRESS' }),
       Complaints.countDocuments({ ...query, status: 'ASSIGN' }),
       Complaints.countDocuments({ ...query, status: 'PENDING' }),
       Complaints.countDocuments({ ...query, status: 'COMPLETED' }),
