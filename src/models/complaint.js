@@ -50,6 +50,8 @@ const complaintSchema = new mongoose.Schema({
   ],
   assignServiceCenter: { type: String },
   assignServiceCenterId: { type: String },
+  assignServiceCenterTime: { type: Date },
+  assignTechnicianTime: { type: Date },
   assignTechnician: { type: String },
   technicianId: { type: String },
   technicianContact: { type: String },
