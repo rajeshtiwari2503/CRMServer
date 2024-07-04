@@ -65,7 +65,15 @@ const getComplaintByUserId = async (req, res) => {
      res.status(400).send(err);
    }
  };
- 
+ const getComplaintByTechId = async (req, res) => {
+   try {
+     const technicianId = req.params.userId;
+     const complaints = await ComplaintModal.find({ technicianId }).populate('technicianId');
+     res.send(complaints);
+   } catch (err) {
+     res.status(400).send(err);
+   }
+ };
  
 // const editComplaint = async (req, res) => {
 //    try {
@@ -192,4 +200,4 @@ const updateComplaint = async (req, res) => {
    }
 }
 
-module.exports = { addComplaint, getAllComplaint,getComplaintByUserId, getComplaintById, editIssueImage, editComplaint, deleteComplaint, updateComplaint };
+module.exports = { addComplaint, getAllComplaint,getComplaintByUserId,getComplaintByTechId, getComplaintById, editIssueImage, editComplaint, deleteComplaint, updateComplaint };
