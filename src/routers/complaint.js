@@ -1,10 +1,14 @@
 const express = require("express")
 
-const {addComplaint,getAllComplaint,getComplaintById,getComplaintByTechId,getComplaintByUserId,editIssueImage ,editComplaint,deleteComplaint,updateComplaint}=require("../controllers/complaintController")
+const {addComplaint,addDealerComplaint,getAllComplaint,getComplaintById,getComplaintByTechId,getComplaintByUserId,editIssueImage ,editComplaint,deleteComplaint,updateComplaint}=require("../controllers/complaintController")
 const {upload}  = require("../services/service");
+ 
+ 
 const router=express.Router()
 
 router.post("/createComplaint",upload().single("issueImages")  , addComplaint);
+router.post("/createDealerComplaint",upload().single("warrantyImage")  , addDealerComplaint);
+ 
 // router.post("/createComplaint",  addComplaint);
 router.get("/getAllComplaint",getAllComplaint)
 router.get("/getComplaintById/:id",getComplaintById)

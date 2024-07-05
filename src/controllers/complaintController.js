@@ -5,7 +5,7 @@ const addComplaint = async (req, res) => {
    try {
       let body = req.body;
 
-      let obj = { ...body, issueImages: req.file.location };
+      let obj = { ...body, issueImages: req.file.location ,warrantyImage:" " };
 
       let data = new ComplaintModal(obj);
       await data.save();
@@ -25,7 +25,32 @@ const addComplaint = async (req, res) => {
    }
 
 };
+const addDealerComplaint = async (req, res) => {
+   try {
+      let body = req.body;
+      let warrantyImage = req.file ? req.file.location : "";
+      let issueImages = req.file ? req.file.location : "";
+      let obj = { ...body,issueImages , warrantyImage  };
 
+      let data = new ComplaintModal(obj);
+      await data.save();
+      const notification = new NotificationModel({
+         complaintId: data?._id,
+         userId: data.userId,
+         brandId: data.brandId,
+         dealerId: data.dealerId,
+         userName: data.fullName,
+         title: `Dealer Complaint`,
+         message: `Registred Your Complaint, ${req.body.fullName}!`,
+      });
+      await notification.save();
+      res.json({ status: true, msg: "Complaint   Added" });
+   } catch (err) {
+      res.status(400).send(err);
+   }
+
+};
+ 
 const editIssueImage = async (req, res) => {
    try {
       let _id = req.params.id;
@@ -200,4 +225,4 @@ const updateComplaint = async (req, res) => {
    }
 }
 
-module.exports = { addComplaint, getAllComplaint,getComplaintByUserId,getComplaintByTechId, getComplaintById, editIssueImage, editComplaint, deleteComplaint, updateComplaint };
+module.exports = { addComplaint,addDealerComplaint, getAllComplaint,getComplaintByUserId,getComplaintByTechId, getComplaintById, editIssueImage, editComplaint, deleteComplaint, updateComplaint };
