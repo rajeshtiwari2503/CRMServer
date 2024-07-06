@@ -5,9 +5,10 @@ const brandStockSchema = new mongoose.Schema({
     brandName: { type: String },
     freshStock:{ type: String },
     defectiveStock:{ type: String },
-    sparepart:{ type: String },
+    sparepartName:{ type: String },
+    sparepartId:{ type: String },
 }, { timestamps: true })
 
-const brandStockModel = new mongoose.model("brandStock", brandStockSchema);
+const BrandStockModel = new mongoose.model("brandStock", brandStockSchema);
 
-module.exports = brandStockModel;
+module.exports = BrandStockModel;
