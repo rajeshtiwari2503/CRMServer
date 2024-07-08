@@ -527,7 +527,7 @@ router.get("/dashboardDetailsByBrandId/:id", async (req, res) => {
     const query = {brandId:id};
     const [
       allComplaintCount,
-      complaintNewCount,
+      complaintProdressCount,
       complaintAssignCount,
       complaintPendingCount,
       complaintCompleteCount,
@@ -535,7 +535,7 @@ router.get("/dashboardDetailsByBrandId/:id", async (req, res) => {
       complaintPartPendingCount
     ] = await Promise.all([
       Complaints.countDocuments(query),
-      Complaints.countDocuments({ ...query, status: 'NEW' }),
+      Complaints.countDocuments({ ...query, status: 'IN PROGRESS' }),
       Complaints.countDocuments({ ...query, status: 'ASSIGN' }),
       Complaints.countDocuments({ ...query, status: 'PENDING' }),
       Complaints.countDocuments({ ...query, status: 'COMPLETED' }),
@@ -546,7 +546,7 @@ router.get("/dashboardDetailsByBrandId/:id", async (req, res) => {
     res.json({
       complaints: {
         allComplaints: allComplaintCount,
-        new: complaintNewCount,
+        inProgress: complaintProdressCount,
         assign: complaintAssignCount,
         pending: complaintPendingCount,
         complete: complaintCompleteCount,
