@@ -1,17 +1,24 @@
 const BrandStockModel =require("../models/brandStock")
 
-const addStock  = async (req, res) => {
-  
-        try{
-            let body=req.body;
-            let data=new BrandStockModel(body);
-            await data.save();
-            res.json({status:true,msg:"Stock   Added"});
-        }catch(err){
-            res.status(400).send(err);
-        }
- 
+const addStock = async (req, res) => {
+   try {
+       const { sparepartName } = req.body;
+
+       // Check if the spare part name already exists
+       const existingSparePart = await BrandStockModel.findOne({ sparepartName });
+       if (existingSparePart) {
+           return res.json({ status: false, msg: "Spare part name already exists in stocks" });
+       }
+
+       // If not, proceed to add the new spare part
+       const data = new BrandStockModel(req.body);
+       await data.save();
+       res.json({ status: true, msg: "Stock Added" });
+   } catch (err) {
+       res.status(400).send(err);
+   }
 };
+
 
 const getAllStock=async(req,res)=>{
     try{
