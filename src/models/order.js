@@ -6,7 +6,9 @@ const OrderSchema = mongoose.Schema({
         // unique: true,
         // sparse: true  
     },
- 
+    sparepartId: {
+        type: String
+    },
     partName: {
         type: String
     },

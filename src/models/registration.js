@@ -108,6 +108,8 @@ const bradRegistrationSchema = new mongoose.Schema({
         verification: { type: String, default: "NOT_VERIFY" }
         , otp: { type: Number },
         status: { type: String, default: "ACTIVE" },
+        totalAmount: { type: Number, default: 0 },
+        walletAmount: { type: Number, default: 0 }
   
   },{timestamps:true}
 );
@@ -231,6 +233,8 @@ const serviceCenterRegistrationSchema = new mongoose.Schema({
     , otp: { type: Number },
 
     status: { type: String, default: "ACTIVE" },
+    totalAmount: { type: Number, default: 0 },
+    walletAmount: { type: Number, default: 0 }
 }, { timestamps: true });
 
 const employeeRegistrationSchema = new mongoose.Schema({
@@ -283,7 +287,9 @@ const dealerRegistrationSchema = new mongoose.Schema({
     },
     verification: { type: String, default: "NOT_VERIFY" }
     , otp: { type: Number },
-    role: { type: String, default: "DEALER" }
+    role: { type: String, default: "DEALER" },
+    totalAmount: { type: Number, default: 0 },
+    walletAmount: { type: Number, default: 0 }
 },
     { timestamps: true });
 
@@ -295,7 +301,12 @@ const userRegistrationSchema = new mongoose.Schema({
     address: { type: String  },
     role: { type: String, default: "USER" },
     verification: { type: String, default: "NOT_VERIFY" }
-    , otp: { type: Number }
+    ,
+    acceptedTerms: {
+      type: Boolean,
+      required: true,
+    },
+    otp: { type: Number }
 },
     { timestamps: true });
 

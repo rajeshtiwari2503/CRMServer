@@ -1,17 +1,54 @@
 const OrderModel = require("../models/order")
+const BrandStockModel = require("../models/brandStock")
+
+// const addOrder = async (req, res) => {
+
+//     try {
+//         let body = req.body;
+//         let data = new OrderModel(body);
+//         await data.save();
+//         res.json({ status: true, msg: "Order   Added" });
+//     } catch (err) {
+//         res.status(400).send(err);
+//     }
+
+// };
+
 
 const addOrder = async (req, res) => {
-
     try {
-        let body = req.body;
-        let data = new OrderModel(body);
-        await data.save();
-        res.json({ status: true, msg: "Order   Added" });
+      let body = req.body;
+      let { quantity, sparepartId } = body;
+  
+      // Retrieve the product to check the stock quantity
+      const sparePart = await BrandStockModel.findOne({ sparepartId: sparepartId });
+  
+      if (!sparePart) {
+        return res.status(404).json({ status: false, msg: "Spare part not found" });
+      }
+  
+      // Check if there is enough stock to fulfill the order
+      if (parseInt(sparePart.freshStock) < quantity) {
+        return res.json({ status: false, msg: "Insufficient stock" });
+      }
+  
+      // Deduct the order quantity from the stock
+      sparePart.freshStock = parseInt(sparePart.freshStock) - quantity;
+  
+      // Save the updated product stock
+      await sparePart.save();
+  
+      // Create a new order
+      let data = new OrderModel(req.body);
+      await data.save();
+  
+      res.json({ status: true, msg: "Order Added" });
     } catch (err) {
-        res.status(400).send(err);
+      console.error('Error in addOrder:', err);
+      res.status(400).send(err);
     }
+  };
 
-};
 
 const getAllOrder = async (req, res) => {
     try {
