@@ -1,12 +1,12 @@
 const express = require("express");
 const router = new express.Router();
-const { 
-  BrandRegistrationModel, 
-  ServiceModel, 
-  TechnicianModal, 
-  EmployeeModel, 
-  DealerModel, 
-  UserModel 
+const {
+  BrandRegistrationModel,
+  ServiceModel,
+  TechnicianModal,
+  EmployeeModel,
+  DealerModel,
+  UserModel
 } = require('../models/registration');
 const Orders = require("../models/order");
 const SpareParts = require("../models/sparePart");
@@ -16,21 +16,26 @@ const ComplaintModal = require("../models/complaint");
 
 router.get("/dashboardDetails", async (req, res) => {
   try {
+    const { now, oneDayAgo, fiveDaysAgo } = calculateDateRanges();
+
     const [
-      customerCount, 
-      orderCount, 
-      serviceCount, 
-      technicianCount, 
-      dealerCount, 
-      sparePartCount, 
+      customerCount,
+      orderCount,
+      serviceCount,
+      technicianCount,
+      dealerCount,
+      sparePartCount,
       brandCount,
       allComplaintCount,
-      complaintNewCount,
+      complaintProdressCount,
       complaintAssignCount,
       complaintPendingCount,
       complaintCompleteCount,
       complaintCancelCount,
-      complaintPartPendingCount
+      complaintPartPendingCount,
+      complaints0To1Days,
+      complaints2To5Days,
+      complaintsMoreThan5Days
     ] = await Promise.all([
       UserModel.countDocuments({}),
       Orders.countDocuments({}),
@@ -39,13 +44,16 @@ router.get("/dashboardDetails", async (req, res) => {
       DealerModel.countDocuments({}),
       SpareParts.countDocuments({}),
       BrandRegistrationModel.countDocuments({}),
-      Complaints.countDocuments({ }),
-      Complaints.countDocuments({ status: 'NEW' }),
+      Complaints.countDocuments({}),
+      Complaints.countDocuments({ status: 'IN PROGRESS' }),
       Complaints.countDocuments({ status: 'ASSIGN' }),
       Complaints.countDocuments({ status: 'PENDING' }),
       Complaints.countDocuments({ status: 'COMPLETED' }),
       Complaints.countDocuments({ status: 'CANCELED' }),
-      Complaints.countDocuments({ status: 'PART PENDIND' })
+      Complaints.countDocuments({ status: 'PART PENDIND' }),
+      Complaints.countDocuments({  createdAt: { $gte: oneDayAgo } }),
+      Complaints.countDocuments({   createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo } }),
+      Complaints.countDocuments({   createdAt: { $lt: fiveDaysAgo } })
     ]);
 
     res.json({
@@ -58,12 +66,15 @@ router.get("/dashboardDetails", async (req, res) => {
       brands: brandCount,
       complaints: {
         allComplaints: allComplaintCount,
-        new: complaintNewCount,
+        inProgress: complaintProdressCount,
         assign: complaintAssignCount,
         pending: complaintPendingCount,
         complete: complaintCompleteCount,
         cancel: complaintCancelCount,
-        partPending: complaintPartPendingCount
+        partPending: complaintPartPendingCount,
+        zeroToOneDays: complaints0To1Days,
+        twoToFiveDays: complaints2To5Days,
+        moreThanFiveDays: complaintsMoreThan5Days
       }
     });
   } catch (err) {
@@ -75,10 +86,10 @@ router.get("/dashboardDetails", async (req, res) => {
 router.get('/getUserAndProduct', async (req, res) => {
   try {
     const [
-      customers, 
-      services, 
-      technicians, 
-      dealers,  
+      customers,
+      services,
+      technicians,
+      dealers,
       brands,
       product
     ] = await Promise.all([
@@ -153,7 +164,7 @@ router.get('/getUserAndProduct', async (req, res) => {
 //     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 //     const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
 //     const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  
+
 //     // Query to filter complaints by assignServiceCenterId
 //     const query = { assignServiceCenterId: id };
 
@@ -252,35 +263,35 @@ router.get('/getUserAndProduct', async (req, res) => {
 //     res.status(500).send(err);
 //   }
 // });
- 
+
 router.get("/dashboardDetailsBySeviceCenterId/:id", async (req, res) => {
   try {
     const id = req.params.id;
 
     // Get the current date
-    const now = new Date();
-    
+    const now1 = new Date();
+
     // Start of today (midnight of the current day)
-    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    
+    const startOfDay = new Date(now1.getFullYear(), now1.getMonth(), now1.getDate());
+
     // Start of the current week (Sunday)
-    const startOfWeek = new Date(now);
-    startOfWeek.setDate(now.getDate() - now.getDay());
+    const startOfWeek = new Date(now1);
+    startOfWeek.setDate(now1.getDate() - now1.getDay());
     startOfWeek.setHours(0, 0, 0, 0);
-    
+
     // Start of the current month
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    
+    const startOfMonth = new Date(now1.getFullYear(), now1.getMonth(), 1);
+
     // Start of the last month
-    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+    const startOfLastMonth = new Date(now1.getFullYear(), now1.getMonth() - 1, 1);
+    const endOfLastMonth = new Date(now1.getFullYear(), now1.getMonth(), 0);
 
     // Start of the last week (previous week Sunday)
     const startOfLastWeek = new Date(startOfWeek);
     startOfLastWeek.setDate(startOfLastWeek.getDate() - 7);
     startOfLastWeek.setHours(0, 0, 0, 0);
     const endOfLastWeek = new Date(startOfWeek);
-
+    const {  now, oneDayAgo, fiveDaysAgo } = calculateDateRanges();
     // Query to filter complaints by assignServiceCenterId
     const query = { assignServiceCenterId: id };
 
@@ -301,6 +312,9 @@ router.get("/dashboardDetailsBySeviceCenterId/:id", async (req, res) => {
       lastMonthCancelCount,
       lastMonthPartPendingCount,
       allWeekComplaintCount,
+      complaints0To1Days,
+      complaints2To5Days,
+      complaintsMoreThan5Days,
       lastWeekNewCount,
       lastWeekAssignCount,
       lastWeekPendingCount,
@@ -323,9 +337,11 @@ router.get("/dashboardDetailsBySeviceCenterId/:id", async (req, res) => {
       Complaints.countDocuments({ ...query, status: 'COMPLETED' }),
       Complaints.countDocuments({ ...query, status: 'CANCELED' }),
       Complaints.countDocuments({ ...query, status: 'PART PENDING' }),
-
+      Complaints.countDocuments({ ...query, createdAt: { $gte: oneDayAgo } }),
+      Complaints.countDocuments({ ...query, createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo } }),
+      Complaints.countDocuments({ ...query, createdAt: { $lt: fiveDaysAgo } }),
       // Last Month counts
-      Complaints.countDocuments({...query,createdAt: { $gte: startOfLastMonth, $lt: startOfMonth } }),
+      Complaints.countDocuments({ ...query, createdAt: { $gte: startOfLastMonth, $lt: startOfMonth } }),
       Complaints.countDocuments({ ...query, status: 'IN PROGRESS', createdAt: { $gte: startOfLastMonth, $lt: startOfMonth } }),
       Complaints.countDocuments({ ...query, status: 'ASSIGN', createdAt: { $gte: startOfLastMonth, $lt: startOfMonth } }),
       Complaints.countDocuments({ ...query, status: 'PENDING', createdAt: { $gte: startOfLastMonth, $lt: startOfMonth } }),
@@ -334,7 +350,7 @@ router.get("/dashboardDetailsBySeviceCenterId/:id", async (req, res) => {
       Complaints.countDocuments({ ...query, status: 'PART PENDING', createdAt: { $gte: startOfLastMonth, $lt: startOfMonth } }),
 
       // Last Week counts
-      Complaints.countDocuments({...query,createdAt: { $gte: startOfLastMonth, $lt: startOfMonth } }),
+      Complaints.countDocuments({ ...query, createdAt: { $gte: startOfLastMonth, $lt: startOfMonth } }),
       Complaints.countDocuments({ ...query, status: 'IN PROGRESS', createdAt: { $gte: startOfLastWeek, $lt: endOfLastWeek } }),
       Complaints.countDocuments({ ...query, status: 'ASSIGN', createdAt: { $gte: startOfLastWeek, $lt: endOfLastWeek } }),
       Complaints.countDocuments({ ...query, status: 'PENDING', createdAt: { $gte: startOfLastWeek, $lt: endOfLastWeek } }),
@@ -344,7 +360,7 @@ router.get("/dashboardDetailsBySeviceCenterId/:id", async (req, res) => {
 
 
       // Daily counts
-      Complaints.countDocuments({...query,createdAt: { $gte: startOfDay } }),
+      Complaints.countDocuments({ ...query, createdAt: { $gte: startOfDay } }),
       Complaints.countDocuments({ ...query, status: 'IN PROGRESS', createdAt: { $gte: startOfDay } }),
       Complaints.countDocuments({ ...query, status: 'ASSIGN', createdAt: { $gte: startOfDay } }),
       Complaints.countDocuments({ ...query, status: 'PENDING', createdAt: { $gte: startOfDay } }),
@@ -364,6 +380,9 @@ router.get("/dashboardDetailsBySeviceCenterId/:id", async (req, res) => {
         complete: complaintCompleteCount,
         cancel: complaintCancelCount,
         partPending: complaintPartPendingCount,
+        zeroToOneDays: complaints0To1Days,
+        twoToFiveDays: complaints2To5Days,
+        moreThanFiveDays: complaintsMoreThan5Days,
         lastMonth: {
           allComplaints: allMonthComplaintCount,
           inProgress: lastMonthNewCount,
@@ -372,6 +391,9 @@ router.get("/dashboardDetailsBySeviceCenterId/:id", async (req, res) => {
           complete: lastMonthCompleteCount,
           cancel: lastMonthCancelCount,
           partPending: lastMonthPartPendingCount,
+          zeroToOneDays: complaints0To1Days,
+          twoToFiveDays: complaints2To5Days,
+          moreThanFiveDays: complaintsMoreThan5Days,
         },
         lastWeek: {
           allComplaints: allWeekComplaintCount,
@@ -401,20 +423,25 @@ router.get("/dashboardDetailsBySeviceCenterId/:id", async (req, res) => {
 });
 
 
- 
+
 
 router.get("/dashboardDetailsByTechnicianId/:id", async (req, res) => {
   try {
     const id = req.params.id;
-    const query = {technicianId:id};
+    const query = { technicianId: id };
+
+    const { now, oneDayAgo, fiveDaysAgo } = calculateDateRanges();
     const [
       allComplaintCount,
-      complaintNewCount,
+      complaintProdressCount,
       complaintAssignCount,
       complaintPendingCount,
       complaintCompleteCount,
       complaintCancelCount,
-      complaintPartPendingCount
+      complaintPartPendingCount,
+      complaints0To1Days,
+      complaints2To5Days,
+      complaintsMoreThan5Days
     ] = await Promise.all([
       Complaints.countDocuments(query),
       Complaints.countDocuments({ ...query, status: 'IN PROGRESS' }),
@@ -422,18 +449,24 @@ router.get("/dashboardDetailsByTechnicianId/:id", async (req, res) => {
       Complaints.countDocuments({ ...query, status: 'PENDING' }),
       Complaints.countDocuments({ ...query, status: 'COMPLETED' }),
       Complaints.countDocuments({ ...query, status: 'CANCELED' }),
-      Complaints.countDocuments({ ...query, status: 'PART PENDING' })
+      Complaints.countDocuments({ ...query, status: 'PART PENDING' }),
+      Complaints.countDocuments({ ...query, createdAt: { $gte: oneDayAgo } }),
+      Complaints.countDocuments({ ...query, createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo } }),
+      Complaints.countDocuments({ ...query, createdAt: { $lt: fiveDaysAgo } })
     ]);
 
     res.json({
       complaints: {
         allComplaints: allComplaintCount,
-        inProgress: complaintNewCount,
+        inProgress: complaintProdressCount,
         assign: complaintAssignCount,
         pending: complaintPendingCount,
         complete: complaintCompleteCount,
         cancel: complaintCancelCount,
-        partPending: complaintPartPendingCount
+        partPending: complaintPartPendingCount,
+        zeroToOneDays: complaints0To1Days,
+        twoToFiveDays: complaints2To5Days,
+        moreThanFiveDays: complaintsMoreThan5Days
       }
     });
   } catch (err) {
@@ -442,37 +475,49 @@ router.get("/dashboardDetailsByTechnicianId/:id", async (req, res) => {
   }
 });
 
+    
+
 router.get("/dashboardDetailsByDealerId/:id", async (req, res) => {
   try {
     const id = req.params.id;
-    const query = {dealerId:id};
+    const query = { dealerId: id };
+ const { now, oneDayAgo, fiveDaysAgo } = calculateDateRanges();
     const [
       allComplaintCount,
-      complaintNewCount,
+      complaintProdressCount,
       complaintAssignCount,
       complaintPendingCount,
       complaintCompleteCount,
       complaintCancelCount,
-      complaintPartPendingCount
+      complaintPartPendingCount,
+      complaints0To1Days,
+      complaints2To5Days,
+      complaintsMoreThan5Days
     ] = await Promise.all([
       Complaints.countDocuments(query),
-      Complaints.countDocuments({ ...query, status: 'NEW' }),
+      Complaints.countDocuments({ ...query, status: 'IN PROGRESS' }),
       Complaints.countDocuments({ ...query, status: 'ASSIGN' }),
       Complaints.countDocuments({ ...query, status: 'PENDING' }),
       Complaints.countDocuments({ ...query, status: 'COMPLETED' }),
       Complaints.countDocuments({ ...query, status: 'CANCELED' }),
-      Complaints.countDocuments({ ...query, status: 'PART PENDING' })
+      Complaints.countDocuments({ ...query, status: 'PART PENDING' }),
+      Complaints.countDocuments({ ...query, createdAt: { $gte: oneDayAgo } }),
+      Complaints.countDocuments({ ...query, createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo } }),
+      Complaints.countDocuments({ ...query, createdAt: { $lt: fiveDaysAgo } })
     ]);
 
     res.json({
       complaints: {
         allComplaints: allComplaintCount,
-        new: complaintNewCount,
+        inProgress: complaintProdressCount,
         assign: complaintAssignCount,
         pending: complaintPendingCount,
         complete: complaintCompleteCount,
         cancel: complaintCancelCount,
-        partPending: complaintPartPendingCount
+        partPending: complaintPartPendingCount,
+        zeroToOneDays: complaints0To1Days,
+        twoToFiveDays: complaints2To5Days,
+        moreThanFiveDays: complaintsMoreThan5Days
       }
     });
   } catch (err) {
@@ -485,46 +530,8 @@ router.get("/dashboardDetailsByDealerId/:id", async (req, res) => {
 router.get("/dashboardDetailsByUserId/:id", async (req, res) => {
   try {
     const id = req.params.id;
-    const query = {userId:id};
-    const [
-      allComplaintCount,
-      complaintNewCount,
-      complaintAssignCount,
-      complaintPendingCount,
-      complaintCompleteCount,
-      complaintCancelCount,
-      complaintPartPendingCount
-    ] = await Promise.all([
-      Complaints.countDocuments(query),
-      Complaints.countDocuments({ ...query, status: 'NEW' }),
-      Complaints.countDocuments({ ...query, status: 'ASSIGN' }),
-      Complaints.countDocuments({ ...query, status: 'PENDING' }),
-      Complaints.countDocuments({ ...query, status: 'COMPLETED' }),
-      Complaints.countDocuments({ ...query, status: 'CANCELED' }),
-      Complaints.countDocuments({ ...query, status: 'PART PENDING' })
-    ]);
-
-    res.json({
-      complaints: {
-        allComplaints: allComplaintCount,
-        new: complaintNewCount,
-        assign: complaintAssignCount,
-        pending: complaintPendingCount,
-        complete: complaintCompleteCount,
-        cancel: complaintCancelCount,
-        partPending: complaintPartPendingCount
-      }
-    });
-  } catch (err) {
-    console.error('Error in /dashboardDetailsById/:id:', err);
-    res.status(500).send(err);
-  }
-});
-
-router.get("/dashboardDetailsByBrandId/:id", async (req, res) => {
-  try {
-    const id = req.params.id;
-    const query = {brandId:id};
+    const query = { userId: id };
+    const { now, oneDayAgo, fiveDaysAgo } = calculateDateRanges();
     const [
       allComplaintCount,
       complaintProdressCount,
@@ -532,7 +539,10 @@ router.get("/dashboardDetailsByBrandId/:id", async (req, res) => {
       complaintPendingCount,
       complaintCompleteCount,
       complaintCancelCount,
-      complaintPartPendingCount
+      complaintPartPendingCount,
+      complaints0To1Days,
+      complaints2To5Days,
+      complaintsMoreThan5Days
     ] = await Promise.all([
       Complaints.countDocuments(query),
       Complaints.countDocuments({ ...query, status: 'IN PROGRESS' }),
@@ -540,7 +550,10 @@ router.get("/dashboardDetailsByBrandId/:id", async (req, res) => {
       Complaints.countDocuments({ ...query, status: 'PENDING' }),
       Complaints.countDocuments({ ...query, status: 'COMPLETED' }),
       Complaints.countDocuments({ ...query, status: 'CANCELED' }),
-      Complaints.countDocuments({ ...query, status: 'PART PENDING' })
+      Complaints.countDocuments({ ...query, status: 'PART PENDING' }),
+      Complaints.countDocuments({ ...query, createdAt: { $gte: oneDayAgo } }),
+      Complaints.countDocuments({ ...query, createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo } }),
+      Complaints.countDocuments({ ...query, createdAt: { $lt: fiveDaysAgo } })
     ]);
 
     res.json({
@@ -551,7 +564,68 @@ router.get("/dashboardDetailsByBrandId/:id", async (req, res) => {
         pending: complaintPendingCount,
         complete: complaintCompleteCount,
         cancel: complaintCancelCount,
-        partPending: complaintPartPendingCount
+        partPending: complaintPartPendingCount,
+        zeroToOneDays: complaints0To1Days,
+        twoToFiveDays: complaints2To5Days,
+        moreThanFiveDays: complaintsMoreThan5Days
+      }
+    });
+  } catch (err) {
+    console.error('Error in /dashboardDetailsById/:id:', err);
+    res.status(500).send(err);
+  }
+});
+
+
+const calculateDateRanges = () => {
+  const now = new Date();
+  const oneDayAgo = new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000);
+  const twoDaysAgo = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
+  const fiveDaysAgo = new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000);
+
+  return { now, oneDayAgo, twoDaysAgo, fiveDaysAgo };
+};
+router.get("/dashboardDetailsByBrandId/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const query = { brandId: id };
+    const { now, oneDayAgo, fiveDaysAgo } = calculateDateRanges();
+    const [
+      allComplaintCount,
+      complaintProdressCount,
+      complaintAssignCount,
+      complaintPendingCount,
+      complaintCompleteCount,
+      complaintCancelCount,
+      complaintPartPendingCount,
+      complaints0To1Days,
+      complaints2To5Days,
+      complaintsMoreThan5Days
+    ] = await Promise.all([
+      Complaints.countDocuments(query),
+      Complaints.countDocuments({ ...query, status: 'IN PROGRESS' }),
+      Complaints.countDocuments({ ...query, status: 'ASSIGN' }),
+      Complaints.countDocuments({ ...query, status: 'PENDING' }),
+      Complaints.countDocuments({ ...query, status: 'COMPLETED' }),
+      Complaints.countDocuments({ ...query, status: 'CANCELED' }),
+      Complaints.countDocuments({ ...query, status: 'PART PENDING' }),
+      Complaints.countDocuments({ ...query, createdAt: { $gte: oneDayAgo } }),
+      Complaints.countDocuments({ ...query, createdAt: { $gte: fiveDaysAgo, $lt: oneDayAgo } }),
+      Complaints.countDocuments({ ...query, createdAt: { $lt: fiveDaysAgo } })
+    ]);
+
+    res.json({
+      complaints: {
+        allComplaints: allComplaintCount,
+        inProgress: complaintProdressCount,
+        assign: complaintAssignCount,
+        pending: complaintPendingCount,
+        complete: complaintCompleteCount,
+        cancel: complaintCancelCount,
+        partPending: complaintPartPendingCount,
+        zeroToOneDays: complaints0To1Days,
+        twoToFiveDays: complaints2To5Days,
+        moreThanFiveDays: complaintsMoreThan5Days
       }
     });
   } catch (err) {
