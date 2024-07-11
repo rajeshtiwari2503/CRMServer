@@ -1,12 +1,12 @@
 const mongoose=require("mongoose");
 
 const bankTransactionSchema=new mongoose.Schema({
-    userId:{type:String},
-    userName:{type:String},
+    serviceCenterId:{type:String},
+    serviceCenterName:{type:String},
     totalPay:{type:Number},
-    commission:{type:Number},
+    // commission:{type:Number},
     paidAmount:{type:Number},
-    totalDue:{type:Number},
+    // totalDue:{type:Number},
 },{timestamps:true})
 
 const BankTransactionModel=new mongoose.model("bankTransaction",bankTransactionSchema);

@@ -21,6 +21,8 @@ const filterData = require("./src/routers/filterData");
 const bank = require("./src/routers/bank");
 const walletTransaction = require("./src/routers/bank");
 const chatTicket = require("./src/routers/chatTicket");
+const wallet = require("./src/routers/wallet");
+const payment = require("./src/routers/payments");
 
 
 app.use(express.json());
@@ -58,9 +60,11 @@ app.use(stock);
 app.use(order);
 app.use(dashboard);
 app.use(filterData);
+app.use(chatTicket);
 app.use(bank);
 app.use(walletTransaction);
-app.use(chatTicket);
+app.use(wallet);
+app.use(payment);
 
 app.listen(5000, () => {
     console.log("Server is running on PORT", PORT);
