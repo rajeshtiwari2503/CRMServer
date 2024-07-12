@@ -73,6 +73,7 @@ const complaintSchema = new mongoose.Schema({
   alternateContactInfo: { type: String },
   serviceAddress: { type: String },
   status: { type: String, default: "PENDING" },
+  payment: { type: Number, default: 0 },
   statusComment: { type: String }
 }, { timestamps: true });
 
