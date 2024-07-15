@@ -7,6 +7,10 @@ const walletTransactionSchema=new mongoose.Schema({
     // addedAmount: { type: Number, default: 0 },  
     // walletAmount: { type: Number, default: 0 },
     dueAmount: { type: Number, default: 0 },
+    accountHolderName:{type:String},
+    contact:{type:Number},
+    email:{type:String},
+    bankDetailId:{type:String},
 },{timestamps:true})
 
 const WalletModel=new mongoose.model("walletTransaction",walletTransactionSchema);
