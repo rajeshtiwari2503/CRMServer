@@ -58,8 +58,8 @@ const bradRegistrationSchema = new mongoose.Schema({
       },
       username: {
         type: String,
-        required: true,
-        unique: true
+        // required: true,
+        // unique: true
       },
       password: {
         type: String,
@@ -85,7 +85,7 @@ const bradRegistrationSchema = new mongoose.Schema({
         required: true
       },
       role: { type: String, default: "BRAND" },
-      verification: { type: String, default: "NOT_VERIFY" }
+      verification: { type: String, default: "VERIFIED" }
       , otp: { type: Number },
   
       status: { type: String, default: "ACTIVE" },
@@ -105,12 +105,15 @@ const bradRegistrationSchema = new mongoose.Schema({
         skill:{type:String },
         liveStatus:{type:String,default:"AVAILABLE"},
         role: { type: String, default: "TECHNICIAN" },
-        verification: { type: String, default: "NOT_VERIFY" }
+        verification: { type: String, default: "VERIFIED" }
         , otp: { type: Number },
         status: { type: String, default: "ACTIVE" },
         totalAmount: { type: Number, default: 0 },
-        walletAmount: { type: Number, default: 0 }
-  
+        walletAmount: { type: Number, default: 0 },
+        acceptedTerms: {
+          type: Boolean,
+          
+        },
   },{timestamps:true}
 );
 
@@ -229,7 +232,7 @@ const serviceCenterRegistrationSchema = new mongoose.Schema({
 
 
     role: { type: String, default: "SERVICE" },
-    verification: { type: String, default: "NOT_VERIFY" }
+    verification: { type: String, default: "VERIFIED" }
     , otp: { type: Number },
 
     status: { type: String, default: "ACTIVE" },
@@ -285,7 +288,7 @@ const dealerRegistrationSchema = new mongoose.Schema({
       type: Boolean,
       required: true,
     },
-    verification: { type: String, default: "NOT_VERIFY" }
+    verification: { type: String, default: "VERIFIED" }
     , otp: { type: Number },
     role: { type: String, default: "DEALER" },
     totalAmount: { type: Number, default: 0 },
@@ -300,7 +303,7 @@ const userRegistrationSchema = new mongoose.Schema({
     password: { type: String, required: true },
     address: { type: String  },
     role: { type: String, default: "USER" },
-    verification: { type: String, default: "NOT_VERIFY" }
+    verification: { type: String, default: "VERIFIED" }
     ,
     acceptedTerms: {
       type: Boolean,
