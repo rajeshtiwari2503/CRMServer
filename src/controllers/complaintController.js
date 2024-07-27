@@ -5,7 +5,7 @@ const addComplaint = async (req, res) => {
    try {
       let body = req.body;
 
-      let obj = { ...body, issueImages: req.file.location ,warrantyImage:" " };
+      let obj = { ...body, issueImages: req.file.location  };
 
       let data = new ComplaintModal(obj);
       await data.save();
