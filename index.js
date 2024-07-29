@@ -1,12 +1,8 @@
 const express = require("express");
-const cors = require("cors");
 require("./src/db/connection");
 require("dotenv").config();
-
-// Initialize Express app
+const cors = require("cors");
 const app = express();
-
-// Import routes
 const registration = require("./src/routers/registration");
 const product = require("./src/routers/product");
 const productCategory = require("./src/routers/productCategory");
@@ -28,7 +24,7 @@ const chatTicket = require("./src/routers/chatTicket");
 const wallet = require("./src/routers/wallet");
 const payment = require("./src/routers/payments");
 
-// Middleware
+
 app.use(express.json());
 app.use(cors());
 app.use(function (req, res, next) {
@@ -43,11 +39,12 @@ app.use(function (req, res, next) {
     );
     next();
 });
+const PORT = process.env.PORT || 5000;
 
-// Routes
-app.get("/", (req, res) => {
-    res.json("Server is running");
-});
+app.get("/",(req,res)=>{
+    res.json( "Server is running")
+})
+
 app.use(registration);
 app.use(technician);
 app.use(product);
@@ -69,10 +66,6 @@ app.use(walletTransaction);
 app.use(wallet);
 app.use(payment);
 
-// Export the handler for Vercel
-module.exports = (req, res) => {
-    return new Promise((resolve, reject) => {
-        // Wrap Express app in Vercel serverless function handler
-        app(req, res, (err) => (err ? reject(err) : resolve()));
-    });
-};
+app.listen(5000, () => {
+    console.log("Server is running on PORT", PORT);
+});
