@@ -46,8 +46,8 @@ app.get("/",(req,res)=>{
 })
 
 // app.use(registration);
-// app.use(technician);
-// app.use(product);
+app.use(technician);
+app.use(product);
 // app.use(productCategory);
 // app.use(complaintNature);
 // app.use(sparePart);
