@@ -45,7 +45,7 @@ app.get("/",(req,res)=>{
     res.json( "Server is running")
 })
 
-// app.use(registration);
+app.use(registration);
 app.use(technician);
 app.use(product);
 app.use(productCategory);
