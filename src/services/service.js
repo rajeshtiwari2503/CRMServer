@@ -149,9 +149,9 @@ async function sendMail(email, pass, isForget) {
 // }
 
 const s3 = new aws.S3({
-  region: process.env.AWS_BUCKET_REGION,
-  accessKeyId: process.env.AWS_ACCESS_KEY,
-  secretAccessKey: process.env.AWS_SECRET_KEY
+  region: process.env.CRM_AWS_BUCKET_REGION,
+  accessKeyId: process.env.CRM_AWS_ACCESS_KEY,
+  secretAccessKey: process.env.CRM_AWS_SECRET_KEY
 })
 
 const upload = () => multer({

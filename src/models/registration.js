@@ -15,6 +15,10 @@ const bradRegistrationSchema = new mongoose.Schema({
         type: String,
         required: true
       },
+      username: {
+        type: String,
+        // required: true
+      },
       brandID: {
         type: String,
         required: true
@@ -29,8 +33,8 @@ const bradRegistrationSchema = new mongoose.Schema({
       },
       contactPersonEmail: {
         type: String,
-        required: true,
-        unique: true
+        // required: true,
+        // unique: true
       },
       contactPersonPhoneNumber: {
         type: String,
@@ -78,11 +82,11 @@ const bradRegistrationSchema = new mongoose.Schema({
       },
       termsAndConditions: {
         type: Boolean,
-        required: true
+        // required: true
       },
       privacyPolicy: {
         type: Boolean,
-        required: true
+        // required: true
       },
       role: { type: String, default: "BRAND" },
       verification: { type: String, default: "VERIFIED" }
@@ -206,7 +210,7 @@ const serviceCenterRegistrationSchema = new mongoose.Schema({
     },
     username: {
         type: String,
-        required: true
+        // required: true
     },
     password: {
         type: String,
